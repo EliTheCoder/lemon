@@ -96,8 +96,8 @@ void opcontrol() {
 		int b = ly - lx > 255 ? 255 : ly - lx;
 		mtr1 = a;
 		mtr2 = b;
-		mtr3 = b;
-		mtr4 = a;
+		mtr3 = a;
+		mtr4 = b;
 		pros::delay(20);
 	}
 }
