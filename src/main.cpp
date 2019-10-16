@@ -80,7 +80,7 @@ void opcontrol() {
 	mtr3.set_reversed(true);
 	pros::Motor mtr2(11);
 	mtr2.set_reversed(true);
-	pros::Motor mtr1(20);
+	pros::Motor mtr1(12);
 
 		while (true)
 	{
