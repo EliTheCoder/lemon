@@ -77,7 +77,9 @@ void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor mtr4(1);
 	pros::Motor mtr3(2);
+	mtr3.set_reversed(true);
 	pros::Motor mtr2(11);
+	mtr2.set_reversed(true);
 	pros::Motor mtr1(20);
 
 		while (true)
