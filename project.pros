@@ -3,6 +3,7 @@
     "py/state": {
         "project_name": "lemon",
         "target": "v5",
+        "version": "0.0.2",
         "templates": {
             "kernel": {
                 "location": "/Users/elithecoder/Library/Application Support/PROS/templates/kernel@3.2.0",
