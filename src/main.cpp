@@ -8,7 +8,6 @@
  */
 void initialize()
 {
-
 }
 
 /**
@@ -71,13 +70,36 @@ void opcontrol()
 		int ly = master.get_analog(ANALOG_LEFT_Y);
 		int rx = master.get_analog(ANALOG_RIGHT_X);
 		int ry = master.get_analog(ANALOG_RIGHT_Y);
+		int by = master.get_digital(DIGITAL_Y);
+		int ba = master.get_digital(DIGITAL_A);
 
 		int a = lx + ly > 255 ? 255 : lx + ly;
 		int b = ly - lx > 255 ? 255 : ly - lx;
-		mtr1 = a;
-		mtr2 = b;
-		mtr3 = a;
-		mtr4 = b;
+
+		if (by)
+		{
+			mtr1 = -50;
+			mtr2 = 50;
+			mtr3 = -50;
+			mtr4 = 50;
+		}
+
+		if (ba)
+		{
+			mtr1 = 50;
+			mtr2 = -50;
+			mtr3 = 50;
+			mtr4 = -50;
+		}
+
+		if (by == ba)
+		{
+			mtr1 = a;
+			mtr2 = b;
+			mtr3 = a;
+			mtr4 = b;
+		}
+
 		pros::delay(20);
 	}
 }
