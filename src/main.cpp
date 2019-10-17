@@ -63,6 +63,16 @@ void opcontrol()
 	pros::Motor mtr2(11);
 	mtr2.set_reversed(true);
 	pros::Motor mtr1(12);
+	
+	// turn speed
+	int ts = 50;
+	master.clear();
+
+	auto update_screen = [](pros::Controller master, int ts)
+	{
+		master.clear();
+		master.print(0, 0, "%d", ts);
+	};
 
 	while (true)
 	{
@@ -72,24 +82,26 @@ void opcontrol()
 		int ry = master.get_analog(ANALOG_RIGHT_Y);
 		int by = master.get_digital(DIGITAL_Y);
 		int ba = master.get_digital(DIGITAL_A);
+		int bu = master.get_digital(DIGITAL_UP);
+		int bd = master.get_digital(DIGITAL_DOWN);
 
 		int a = lx + ly > 255 ? 255 : lx + ly;
 		int b = ly - lx > 255 ? 255 : ly - lx;
 
 		if (by)
 		{
-			mtr1 = -50;
-			mtr2 = 50;
-			mtr3 = 50;
-			mtr4 = -50;
+			mtr1 = -ts;
+			mtr2 = ts;
+			mtr3 = ts;
+			mtr4 = -ts;
 		}
 
 		if (ba)
 		{
-			mtr1 = 50;
-			mtr2 = -50;
-			mtr3 = -50;
-			mtr4 = 50;
+			mtr1 = ts;
+			mtr2 = -ts;
+			mtr3 = -ts;
+			mtr4 = ts;
 		}
 
 		if (by == ba)
@@ -98,6 +110,16 @@ void opcontrol()
 			mtr2 = b;
 			mtr3 = a;
 			mtr4 = b;
+		}
+
+		if (bu && ts < 255) {
+			ts++;
+			update_screen(master,ts);
+		}
+
+		if (bd && ts > 1) {
+			ts--;
+			update_screen(master,ts);
 		}
 
 		pros::delay(20);
