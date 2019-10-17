@@ -39,7 +39,36 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	pros::Motor mtr4(1);
+	pros::Motor mtr3(2);
+	mtr3.set_reversed(true);
+	pros::Motor mtr2(11);
+	mtr2.set_reversed(true);
+	pros::Motor mtr1(12);
+
+	mtr1 = 255;
+	mtr2 = -255;
+	mtr3 = -255;
+	mtr4 = 255;
+
+	pros::delay(2000);
+
+	mtr1 = -255;
+	mtr2 = 255;
+	mtr3 = 255;
+	mtr4 = -255;
+
+	pros::delay(2000);
+
+	mtr1 = 0;
+	mtr2 = 0;
+	mtr3 = 0;
+	mtr4 = 0;
+
+	pros::delay(100);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -67,12 +96,6 @@ void opcontrol()
 	// turn speed
 	int ts = 50;
 	master.clear();
-
-	auto update_screen = [](pros::Controller master, int ts)
-	{
-		master.clear();
-		master.print(0, 0, "%d", ts);
-	};
 
 	while (true)
 	{
@@ -114,12 +137,14 @@ void opcontrol()
 
 		if (bu && ts < 255) {
 			ts++;
-			update_screen(master,ts);
+			master.clear();
+			master.print(0, 0, "%d", ts);
 		}
 
 		if (bd && ts > 1) {
 			ts--;
-			update_screen(master,ts);
+			master.clear();
+			master.print(0, 0, "%d", ts);
 		}
 
 		pros::delay(20);
