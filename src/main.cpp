@@ -80,16 +80,16 @@ void opcontrol()
 		{
 			mtr1 = -50;
 			mtr2 = 50;
-			mtr3 = -50;
-			mtr4 = 50;
+			mtr3 = 50;
+			mtr4 = -50;
 		}
 
 		if (ba)
 		{
 			mtr1 = 50;
 			mtr2 = -50;
-			mtr3 = 50;
-			mtr4 = -50;
+			mtr3 = -50;
+			mtr4 = 50;
 		}
 
 		if (by == ba)
