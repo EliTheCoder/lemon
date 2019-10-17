@@ -96,6 +96,7 @@ void opcontrol()
 	// turn speed
 	int ts = 50;
 	master.clear();
+	master.print(1, 1, "%d", ts);
 
 	while (true)
 	{
@@ -138,13 +139,13 @@ void opcontrol()
 		if (bu && ts < 255) {
 			ts++;
 			master.clear();
-			master.print(0, 0, "%d", ts);
+			master.print(1, 1, "%d", ts);
 		}
 
 		if (bd && ts > 1) {
 			ts--;
 			master.clear();
-			master.print(0, 0, "%d", ts);
+			master.print(1, 1, "%d", ts);
 		}
 
 		pros::delay(20);
