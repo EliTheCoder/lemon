@@ -86,9 +86,9 @@ void autonomous() {
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor mtr4(1);
-	pros::Motor mtr3(2);
-	mtr3.set_reversed(true);
+	pros::Motor mtr4(2);
+	mtr4.set_reversed(true);
+	pros::Motor mtr3(1);
 	pros::Motor mtr2(11);
 	mtr2.set_reversed(true);
 	pros::Motor mtr1(12);
@@ -98,8 +98,7 @@ void opcontrol()
 	master.clear();
 	master.print(1, 1, "%d", ts);
 
-	while (true)
-	{
+	while (true) {
 		int lx = master.get_analog(ANALOG_LEFT_X);
 		int ly = master.get_analog(ANALOG_LEFT_Y);
 		int rx = master.get_analog(ANALOG_RIGHT_X);
@@ -112,41 +111,20 @@ void opcontrol()
 		int a = lx + ly > 255 ? 255 : lx + ly;
 		int b = ly - lx > 255 ? 255 : ly - lx;
 
-		if (by)
-		{
-			mtr1 = -ts;
-			mtr2 = ts;
-			mtr3 = ts;
-			mtr4 = -ts;
-		}
+		int i1 = a;
+		int i2 = b;
+		int i3 = b;
+		int i4 = a;
 
-		if (ba)
-		{
-			mtr1 = ts;
-			mtr2 = -ts;
-			mtr3 = -ts;
-			mtr4 = ts;
-		}
+		int j1 = rx;
+		int j2 = -rx;
+		int j3 = rx;
+		int j4 = -rx;
 
-		if (by == ba)
-		{
-			mtr1 = a;
-			mtr2 = b;
-			mtr3 = a;
-			mtr4 = b;
-		}
-
-		if (bu && ts < 255) {
-			ts++;
-			master.clear();
-			master.print(1, 1, "%d", ts);
-		}
-
-		if (bd && ts > 1) {
-			ts--;
-			master.clear();
-			master.print(1, 1, "%d", ts);
-		}
+		mtr1 = i1 + j1 > 255 ? 255 : i1 + j1;
+		mtr2 = i2 + j2 > 255 ? 255 : i2 + j2;
+		mtr3 = i3 + j3 > 255 ? 255 : i3 + j3;
+		mtr4 = i4 + j4 > 255 ? 255 : i4 + j4;
 
 		pros::delay(20);
 	}
