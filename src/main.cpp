@@ -132,8 +132,8 @@ void opcontrol()
 		mtr3 = smooth(i3 + j3);
 		mtr4 = smooth(i4 + j4);
 		
-		if (bl1) mtrWall = 255;
-		else if (bl2) mtrWall = -255;
+		if (bl1) mtrWall = ts;
+		else if (bl2) mtrWall = -ts;
 		else mtrWall = 0;
 
 		if (bu) autonomous();
