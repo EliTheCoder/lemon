@@ -6,9 +6,7 @@
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-void initialize()
-{
-}
+void initialize() {}
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -70,6 +68,10 @@ void autonomous() {
 	pros::delay(100);
 }
 
+int smooth(int x) {
+	return x > 255 ? 255 : x^2/255;
+}
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -96,7 +98,6 @@ void opcontrol()
 	// turn speed
 	int ts = 50;
 	master.clear();
-	master.print(1, 1, "%d", ts);
 
 	while (true) {
 		int lx = master.get_analog(ANALOG_LEFT_X);
@@ -108,8 +109,8 @@ void opcontrol()
 		int bu = master.get_digital(DIGITAL_UP);
 		int bd = master.get_digital(DIGITAL_DOWN);
 
-		int a = lx + ly > 255 ? 255 : lx + ly;
-		int b = ly - lx > 255 ? 255 : ly - lx;
+		int a = smooth(lx + ly);
+		int b = smooth(ly - lx);
 
 		int i1 = a;
 		int i2 = b;
@@ -121,10 +122,12 @@ void opcontrol()
 		int j3 = rx;
 		int j4 = -rx;
 
-		mtr1 = i1 + j1 > 255 ? 255 : i1 + j1;
-		mtr2 = i2 + j2 > 255 ? 255 : i2 + j2;
-		mtr3 = i3 + j3 > 255 ? 255 : i3 + j3;
-		mtr4 = i4 + j4 > 255 ? 255 : i4 + j4;
+		mtr1 = smooth(i1 + j1);
+		mtr2 = smooth(i2 + j2);
+		mtr3 = smooth(i3 + j3);
+		mtr4 = smooth(i4 + j4);
+
+		if (bu) autonomous();
 
 		pros::delay(20);
 	}
