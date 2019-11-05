@@ -89,11 +89,10 @@ void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor mtr4(10);
-	mtr4.set_reversed(true);
 	pros::Motor mtr3(19);
 	pros::Motor mtr2(1);
-	mtr2.set_reversed(true);
 	pros::Motor mtr1(11);
+	mtr1.set_reversed(true);
 	pros::Motor mtrWall(3);
 	
 	// turn speed
