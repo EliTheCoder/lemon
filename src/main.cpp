@@ -88,12 +88,12 @@ int smooth(int x) {
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor mtr4(2);
+	pros::Motor mtr4(10);
 	mtr4.set_reversed(true);
-	pros::Motor mtr3(1);
-	pros::Motor mtr2(11);
+	pros::Motor mtr3(19);
+	pros::Motor mtr2(1);
 	mtr2.set_reversed(true);
-	pros::Motor mtr1(12);
+	pros::Motor mtr1(11);
 	pros::Motor mtrWall(3);
 	
 	// turn speed
@@ -132,8 +132,8 @@ void opcontrol()
 		mtr3 = smooth(i3 + j3);
 		mtr4 = smooth(i4 + j4);
 		
-		if (bl1) mtrWall = ts;
-		else if (bl2) mtrWall = -ts;
+		if (bl1) mtrWall = 128;
+		else if (bl2) mtrWall = -128;
 		else mtrWall = 0;
 
 		if (bu) autonomous();
