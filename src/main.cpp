@@ -93,10 +93,7 @@ void opcontrol()
 	pros::Motor mtr2(1);
 	pros::Motor mtr1(11);
 	mtr1.set_reversed(true);
-	pros::Motor mtrWall(3);
-	
-	// turn speed
-	int ts = 50;
+
 	master.clear();
 
 	while (true) {
@@ -130,10 +127,6 @@ void opcontrol()
 		mtr2 = smooth(i2 + j2);
 		mtr3 = smooth(i3 + j3);
 		mtr4 = smooth(i4 + j4);
-		
-		if (bl1) mtrWall = 128;
-		else if (bl2) mtrWall = -128;
-		else mtrWall = 0;
 
 		if (bu) autonomous();
 
