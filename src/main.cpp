@@ -1,5 +1,5 @@
 #include "main.h"
-
+using namespace pros;
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -38,34 +38,34 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor mtr4(1);
-	pros::Motor mtr3(2);
+	Controller master(E_CONTROLLER_MASTER);
+	Motor mtr4(1);
+	Motor mtr3(2);
 	mtr3.set_reversed(true);
-	pros::Motor mtr2(11);
+	Motor mtr2(11);
 	mtr2.set_reversed(true);
-	pros::Motor mtr1(12);
+	Motor mtr1(12);
 
 	mtr1 = 255;
 	mtr2 = -255;
 	mtr3 = -255;
 	mtr4 = 255;
 
-	pros::delay(2000);
+	delay(2000);
 
 	mtr1 = -255;
 	mtr2 = 255;
 	mtr3 = 255;
 	mtr4 = -255;
 
-	pros::delay(2000);
+	delay(2000);
 
 	mtr1 = 0;
 	mtr2 = 0;
 	mtr3 = 0;
 	mtr4 = 0;
 
-	pros::delay(100);
+	delay(100);
 }
 
 int smooth(int x) {
@@ -87,12 +87,14 @@ int smooth(int x) {
  */
 void opcontrol()
 {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor mtr4(10);
-	pros::Motor mtr3(19);
-	pros::Motor mtr2(1);
-	pros::Motor mtr1(11);
-	mtr1.set_reversed(true);
+	Controller master(E_CONTROLLER_MASTER);
+	
+	Motor mtr1(10);
+	Motor mtr2(19);
+	mtr2.set_reversed(true);
+	Motor mtr3(11);
+	Motor mtr4(1);
+	mtr4.set_reversed(true);
 
 	master.clear();
 
@@ -130,6 +132,6 @@ void opcontrol()
 
 		if (bu) autonomous();
 
-		pros::delay(20);
+		delay(20);
 	}
 }
