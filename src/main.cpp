@@ -39,33 +39,29 @@ void competition_initialize() {}
  */
 void autonomous() {
 	Controller master(E_CONTROLLER_MASTER);
-	Motor mtr4(1);
-	Motor mtr3(2);
-	mtr3.set_reversed(true);
-	Motor mtr2(11);
+	Motor mtr1(10);
+	Motor mtr2(19);
 	mtr2.set_reversed(true);
-	Motor mtr1(12);
+	Motor mtr3(1);
+	Motor mtr4(11);
+	mtr4.set_reversed(true);
 
 	mtr1 = 255;
 	mtr2 = -255;
 	mtr3 = -255;
 	mtr4 = 255;
-
-	delay(2000);
+	delay(800);
 
 	mtr1 = -255;
 	mtr2 = 255;
 	mtr3 = 255;
 	mtr4 = -255;
-
-	delay(2000);
+	delay(500);
 
 	mtr1 = 0;
 	mtr2 = 0;
 	mtr3 = 0;
 	mtr4 = 0;
-
-	delay(100);
 }
 
 int smooth(int x) {
@@ -88,13 +84,17 @@ int smooth(int x) {
 void opcontrol()
 {
 	Controller master(E_CONTROLLER_MASTER);
-	
-	Motor mtr1(10);
-	Motor mtr2(19);
+	Motor mtr1(10); // 
+	Motor mtr2(19); // 
 	mtr2.set_reversed(true);
-	Motor mtr3(11);
-	Motor mtr4(1);
+	Motor mtr3(1); // 
+	Motor mtr4(11); // 
 	mtr4.set_reversed(true);
+	Motor mtr5(9); // intake
+	mtr5.set_reversed(true);
+	Motor mtr6(17); // intake
+	Motor mtr7(18); // arm
+	mtr7.set_reversed(true);
 
 	master.clear();
 
@@ -107,6 +107,8 @@ void opcontrol()
 		int ba = master.get_digital(DIGITAL_A);
 		int bu = master.get_digital(DIGITAL_UP);
 		int bd = master.get_digital(DIGITAL_DOWN);
+		int bl = master.get_digital(DIGITAL_LEFT);
+		int br = master.get_digital(DIGITAL_RIGHT);
 		int bl1 = master.get_digital(DIGITAL_L1);
 		int bl2 = master.get_digital(DIGITAL_L2);
 		int br1 = master.get_digital(DIGITAL_R1);
@@ -130,7 +132,23 @@ void opcontrol()
 		mtr3 = smooth(i3 + j3);
 		mtr4 = smooth(i4 + j4);
 
-		if (bu) autonomous();
+		if (bu && bd && bl && br) autonomous();
+		
+		if (br1) {
+			mtr5 = 255;
+			mtr6 = 255;
+		}
+		else if (br2) {
+			mtr5 = -255;
+			mtr6 = -255;
+		}
+		else {
+			mtr5 = 0;
+			mtr6 = 0;
+		}
+
+
+		mtr7 = ry/2;
 
 		delay(20);
 	}
