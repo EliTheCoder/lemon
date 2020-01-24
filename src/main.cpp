@@ -140,7 +140,7 @@ void opcontrol()
 			if (bu && bd && bl && br && br1 && br2 && bl1 && bl2) {
 				break;
 			}
-			master.rumble();
+			master.rumble("---");
 			// 255, -255, 255, -255
 			// 255, -255, -255, 255
 			// 255, -255, 0, 0
