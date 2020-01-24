@@ -105,6 +105,8 @@ void opcontrol()
 		int ry = master.get_analog(ANALOG_RIGHT_Y);
 		int by = master.get_digital(DIGITAL_Y);
 		int ba = master.get_digital(DIGITAL_A);
+		int bb = master.get_digital(DIGITAL_B);
+		int bx = master.get_digital(DIGITAL_X);
 		int bu = master.get_digital(DIGITAL_UP);
 		int bd = master.get_digital(DIGITAL_DOWN);
 		int bl = master.get_digital(DIGITAL_LEFT);
@@ -133,6 +135,20 @@ void opcontrol()
 		mtr4 = smooth(i4 + j4);
 
 		if (bu && bd && bl && br) autonomous();
+
+		if (ba && bx && bb && by) {
+			if (bu && bd && bl && br && br1 && br2 && bl1 && bl2) {
+				break;
+			}
+			master.rumble();
+			// 255, -255, 255, -255
+			// 255, -255, -255, 255
+			// 255, -255, 0, 0
+			mtr1 = 255;
+			mtr2 = -255;
+			mtr3 = 0;
+			mtr4 = 0;
+		}
 		
 		if (br1) {
 			mtr5 = 255;
