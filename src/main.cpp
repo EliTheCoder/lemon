@@ -1,206 +1,152 @@
 #include "main.h"
 using namespace pros;
-/**
- * Runs initialization code. This occurs as soon as the program is started.
- *
- * All other competition modes are blocked by initialize; it is recommended
- * to keep execution time for this mode under a few seconds.
- */
+
 void initialize() {}
-
-/**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
- */
-void disabled() {}
-
-/**
- * Runs after initialize(), and before autonomous when connected to the Field
- * Management System or the VEX Competition Switch. This is intended for
- * competition-specific initialization routines, such as an autonomous selector
- * on the LCD.
- *
- * This task will exit when the robot is enabled and autonomous or opcontrol
- * starts.
- */
+void disabled() {
+	Controller master(E_CONTROLLER_MASTER);
+	master.clear();
+	master.rumble("...");
+	master.print(0, 0, "lemon is angy");
+	master.print(1, 0, "lemon can't move >:(");
+}
 void competition_initialize() {}
+void autonomous() {}
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
-void autonomous()
-{
+class Wheel {
+  public:
+	Motor motor;
+	double angle;
+	Wheel(Motor motor, double a) : motor(motor) { this->angle = a; };
+	double getValue(double angle1, double magnitude) {
+		double diff = fmod((angle1 - angle + 180.0), 360.0) - 180.0;
+		double angleDist = diff < -180.0 ? diff + 360.0 : diff;
+		angleDist = angleDist / -180.0 + 1;
+		double returnVal = magnitude * angleDist;
+		returnVal = returnVal > 1.0 ? 1.0 : returnVal;
+		returnVal = returnVal < -1.0 ? -1.0 : returnVal;
+		return returnVal;
+	};
+};
+
+void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
-	Motor mtr1(10);
-	Motor mtr2(19);
-	mtr2.set_reversed(true);
-	Motor mtr3(1);
-	Motor mtr4(11);
-	mtr4.set_reversed(true);
 
-	mtr1 = 255;
-	mtr2 = -255;
-	mtr3 = -255;
-	mtr4 = 255;
-	delay(800);
-
-	mtr1 = -255;
-	mtr2 = 255;
-	mtr3 = 255;
-	mtr4 = -255;
-	delay(500);
-
-	mtr1 = 0;
-	mtr2 = 0;
-	mtr3 = 0;
-	mtr4 = 0;
-}
-
-int smooth(int x)
-{
-	return x > 255 ? 255 : x ^ 2 / 255;
-}
-
-void macro()
-{
-	Motor mtr1(10);
-	Motor mtr2(19);
-	mtr2.set_reversed(true);
-	Motor mtr3(1);
-	Motor mtr4(11);
-
-	float degree = 0;
-	float lx = 0;
-	float ly = 0;
-
-	while (true)
-	{
-		degree += 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989/512;
-
-		lx = sin(degree)*255;
-		ly = cos(degree)*255;
-		int a = lx + ly;
-		int b = ly - lx;
-
-		int i1 = a;
-		int i2 = b;
-		int i3 = b;
-		int i4 = a;
-
-		int j1 = 255;
-		int j2 = -255;
-		int j3 = 255;
-		int j4 = -255;
-
-		mtr1 = smooth(i1 + j1);
-		mtr2 = smooth(i2 + j2);
-		mtr3 = smooth(i3 + j3);
-		mtr4 = smooth(i4 + j4);
+	Wheel wheels[4] = Wheel(Motor(0), 0);
+	int wheelPorts[] = {
+		8,	// front-left
+		16, // front-right
+		1,	// back-left
+		9	// back-right
+	};
+	double wheelAngles[] = {315, 225, 225, 315};
+	for (int i = 0; i < sizeof(wheels); i++) {
+		wheels[i] = Wheel(Motor(wheelPorts[i]), wheelAngles[i]);
 	}
-}
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
-void opcontrol()
-{
-	Controller master(E_CONTROLLER_MASTER);
-	Motor mtr1(10); //
-	Motor mtr2(19); //
-	mtr2.set_reversed(true);
-	Motor mtr3(1);  //
-	Motor mtr4(11); //
-	mtr4.set_reversed(true);
-	Motor mtr5(9); // intake
-	mtr5.set_reversed(true);
-	Motor mtr6(17); // intake
-	Motor mtr7(18); // arm
-	mtr7.set_reversed(true);
+	const Motor lclaw(7);
+	lclaw.set_reversed(true);
+	const Motor rclaw(15);
+	const Motor claws[] = {lclaw, rclaw};
 
 	master.clear();
+	master.print(0, 0, "lemon is happi :D");
 
-	while (true)
-	{
-		int lx = master.get_analog(ANALOG_LEFT_X);
-		int ly = master.get_analog(ANALOG_LEFT_Y);
-		int rx = master.get_analog(ANALOG_RIGHT_X);
-		int ry = master.get_analog(ANALOG_RIGHT_Y);
-		int by = master.get_digital(DIGITAL_Y);
-		int ba = master.get_digital(DIGITAL_A);
-		int bb = master.get_digital(DIGITAL_B);
-		int bx = master.get_digital(DIGITAL_X);
-		int bu = master.get_digital(DIGITAL_UP);
-		int bd = master.get_digital(DIGITAL_DOWN);
-		int bl = master.get_digital(DIGITAL_LEFT);
-		int br = master.get_digital(DIGITAL_RIGHT);
-		int bl1 = master.get_digital(DIGITAL_L1);
-		int bl2 = master.get_digital(DIGITAL_L2);
-		int br1 = master.get_digital(DIGITAL_R1);
-		int br2 = master.get_digital(DIGITAL_R2);
-
-		int a = smooth(lx + ly);
-		int b = smooth(ly - lx);
-
-		int i1 = a;
-		int i2 = b;
-		int i3 = b;
-		int i4 = a;
-
-		int j1 = rx;
-		int j2 = -rx;
-		int j3 = rx;
-		int j4 = -rx;
-
-		mtr1 = smooth(i1 + j1);
-		mtr2 = smooth(i2 + j2);
-		mtr3 = smooth(i3 + j3);
-		mtr4 = smooth(i4 + j4);
-
-		if (bu && bd && bl && br)
-			autonomous();
-
-		if (ba && bx && bb && by)
-		{
-			macro();
-		}
-
-		if (br1)
-		{
-			mtr5 = 255;
-			mtr6 = 255;
-		}
-		else if (br2)
-		{
-			mtr5 = -255;
-			mtr6 = -255;
-		}
-		else
-		{
-			mtr5 = 0;
-			mtr6 = 0;
-		}
-
-		mtr7 = ry / 2;
-
-		delay(20);
+	// set all motors to brake mode of hold
+	for (const Wheel &wheel : wheels) {
+		wheel.motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+		wheel.motor.set_encoder_units(E_MOTOR_ENCODER_DEGREES);
+		wheel.motor.set_gearing(E_MOTOR_GEARSET_18);
 	}
+
+	for (const Motor &motor : claws) {
+		motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+		motor.set_encoder_units(E_MOTOR_ENCODER_DEGREES);
+		motor.set_gearing(E_MOTOR_GEARSET_06);
+	}
+
+	double lx = master.get_analog(ANALOG_LEFT_X);
+	double ly = master.get_analog(ANALOG_LEFT_Y);
+	double rx = master.get_analog(ANALOG_RIGHT_X);
+	double ry = master.get_analog(ANALOG_RIGHT_Y);
+	int by = master.get_digital(DIGITAL_Y);
+	int ba = master.get_digital(DIGITAL_A);
+	int bb = master.get_digital(DIGITAL_B);
+	int bx = master.get_digital(DIGITAL_X);
+	int bu = master.get_digital(DIGITAL_UP);
+	int bd = master.get_digital(DIGITAL_DOWN);
+	int bl = master.get_digital(DIGITAL_LEFT);
+	int br = master.get_digital(DIGITAL_RIGHT);
+	int bl1 = master.get_digital(DIGITAL_L1);
+	int bl2 = master.get_digital(DIGITAL_L2);
+	int br1 = master.get_digital(DIGITAL_R1);
+	int br2 = master.get_digital(DIGITAL_R2);
+
+	int autonomousHold = 0;
+	int tareHold = 0;
+
+	while (true) {
+		double movementAngle = atan(ly / lx) * 180.0 / M_PI;
+		double movementMagnitude = sqrt(lx * lx + ly * ly);
+
+		double rots[4] = {rx, -rx, rx, -rx};
+
+		for (int i = 0; i < sizeof(wheels); i++) {
+			float value =
+				(wheels[i].getValue(movementAngle, movementMagnitude) +
+				 rots[i]) /
+				2.0;
+			value = value > 1.0 ? 1.0 : value;
+			value = value < -1.0 ? -1.0 : value;
+			if (abs(value) > 0.001) {
+				wheels[i].motor.move_relative(signbit(value) * 45, value);
+			} else {
+				wheels[i].motor.move_relative(0, 0);
+			}
+		}
+
+		if (bb) {
+			autonomousHold++;
+			if (autonomousHold > 400) {
+				autonomousHold = 0;
+				autonomous();
+			}
+		} else {
+			autonomousHold = 0;
+		}
+
+		if (by) {
+			tareHold++;
+			if (tareHold > 100) {
+				tareHold = 0;
+				for (const Motor &motor : claws) {
+					motor.tare_position();
+				}
+			}
+		} else {
+			tareHold = 0;
+		}
+
+		wheels[0].angle = claws[0].get_position();
+		wheels[1].angle = claws[1].get_position();
+
+		int insideButtons[] = {bl1, br1};
+		int outsideButtons[] = {bl2, br2};
+
+		for (int i = 0; i < sizeof(insideButtons); i++) {
+			if (!insideButtons[i] && !outsideButtons[i]) {
+				claws[i].move_relative(0, 0);
+			}
+			if (insideButtons[i]) {
+				claws[i].move_relative(25, 100);
+			}
+			if (outsideButtons[i]) {
+				claws[i].move_relative(45, 100);
+			}
+			if (insideButtons[i] && outsideButtons[i]) {
+				claws[i].move_relative(0, 0);
+			}
+		}
+	}
+
+	delay(10);
 }
