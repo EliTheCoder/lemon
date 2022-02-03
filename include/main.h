@@ -35,6 +35,7 @@
 #define PROS_USE_LITERALS
 
 #include "api.h"
+#include <array>
 #include <math.h>
 #include <vector>
 

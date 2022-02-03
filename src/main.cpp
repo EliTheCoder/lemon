@@ -33,7 +33,7 @@ void opcontrol() {
 		Wheel operator=(Wheel other) { return Wheel(other.motor, other.angle); }
 	};
 
-	Wheel wheels[4];
+	std::array<Wheel, 4> wheels;
 	int wheelPorts[4] = {
 		8,	// front-left
 		16, // front-right
@@ -41,7 +41,7 @@ void opcontrol() {
 		9	// back-right
 	};
 	double wheelAngles[4] = {315.0, 225.0, 225.0, 315.0};
-	for (int i = 0; i < sizeof(wheels) / sizeof(*wheels); i++) {
+	for (int i = 0; i < wheels.size(); i++) {
 		wheels[i] = Wheel(Motor(wheelPorts[i]), wheelAngles[i]);
 	}
 
@@ -66,25 +66,12 @@ void opcontrol() {
 		motor.set_gearing(E_MOTOR_GEARSET_06);
 	}
 
-	double lx = master.get_analog(ANALOG_LEFT_X);
-	double ly = master.get_analog(ANALOG_LEFT_Y);
-	double rx = master.get_analog(ANALOG_RIGHT_X);
-	double ry = master.get_analog(ANALOG_RIGHT_Y);
-	int by = master.get_digital(DIGITAL_Y);
-	int ba = master.get_digital(DIGITAL_A);
-	int bb = master.get_digital(DIGITAL_B);
-	int bx = master.get_digital(DIGITAL_X);
-	int bu = master.get_digital(DIGITAL_UP);
-	int bd = master.get_digital(DIGITAL_DOWN);
-	int bl = master.get_digital(DIGITAL_LEFT);
-	int br = master.get_digital(DIGITAL_RIGHT);
-	int bl1 = master.get_digital(DIGITAL_L1);
-	int bl2 = master.get_digital(DIGITAL_L2);
-	int br1 = master.get_digital(DIGITAL_R1);
-	int br2 = master.get_digital(DIGITAL_R2);
-
 	int autonomousHold = 0;
 	int tareHold = 0;
+
+	double lx = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+	double ly = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+	double rx = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
 
 	while (true) {
 		double movementAngle = atan(ly / lx) * 180.0 / M_PI;
@@ -92,7 +79,7 @@ void opcontrol() {
 
 		double rots[4] = {rx, -rx, rx, -rx};
 
-		for (int i = 0; i < sizeof(wheels) / sizeof(*wheels); i++) {
+		for (int i = 0; i < wheels.size(); i++) {
 			float value =
 				(wheels[i].getValue(movementAngle, movementMagnitude) +
 				 rots[i]) /
@@ -106,7 +93,7 @@ void opcontrol() {
 			}
 		}
 
-		if (bb) {
+		if (master.get_digital(E_CONTROLLER_DIGITAL_B)) {
 			autonomousHold++;
 			if (autonomousHold > 400.0) {
 				autonomousHold = 0.0;
@@ -116,7 +103,7 @@ void opcontrol() {
 			autonomousHold = 0.0;
 		}
 
-		if (by) {
+		if (master.get_digital(E_CONTROLLER_DIGITAL_X)) {
 			tareHold++;
 			if (tareHold > 100.0) {
 				tareHold = 0.0;
@@ -131,8 +118,10 @@ void opcontrol() {
 		wheels[0].angle = claws[0].get_position() + 315.0;
 		wheels[1].angle = claws[1].get_position() + 225.0;
 
-		int insideButtons[] = {bl1, br1};
-		int outsideButtons[] = {bl2, br2};
+		int insideButtons[2] = {master.get_digital(E_CONTROLLER_DIGITAL_L1),
+								master.get_digital(E_CONTROLLER_DIGITAL_R1)};
+		int outsideButtons[2] = {master.get_digital(E_CONTROLLER_DIGITAL_R2),
+								 master.get_digital(E_CONTROLLER_DIGITAL_L2)};
 
 		for (int i = 0; i < sizeof(insideButtons) / sizeof(*insideButtons);
 			 i++) {
