@@ -123,10 +123,13 @@ void opcontrol() {
 				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 				claws[i].move_absolute(25.0, 100.0);
 			} else {
+				claws[i].move_absolute(0.0, 0);
 			}
 			if (outsideButtons[i]) {
 				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 				claws[i].move_absolute(45.0, 100.0);
+			} else {
+				claws[i].move_absolute(0.0, 0);
 			}
 			if (insideButtons[i] && outsideButtons[i]) {
 				claws[i].move_absolute(0.0, 0.0);
