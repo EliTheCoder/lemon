@@ -30,6 +30,11 @@ void opcontrol() {
 			returnVal = returnVal < -1.0 ? -1.0 : returnVal;
 			return returnVal;
 		};
+		double setAngle(double angle1) {
+			double newAngle = fmod(angle1, 360.0);
+			this->angle = newAngle < 0.0 ? newAngle + 360.0 : newAngle;
+			return this->angle;
+		}
 		Wheel operator=(Wheel other) { return Wheel(other.motor, other.angle); }
 	};
 
@@ -53,7 +58,6 @@ void opcontrol() {
 	master.clear();
 	master.print(0, 0, "lemon is happi :D");
 
-	// set all motors to brake mode of hold
 	for (const Wheel &wheel : wheels) {
 		wheel.motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 		wheel.motor.set_encoder_units(E_MOTOR_ENCODER_DEGREES);
@@ -115,8 +119,19 @@ void opcontrol() {
 			tareHold = 0;
 		}
 
-		wheels[0].angle = claws[0].get_position() + 315.0;
-		wheels[1].angle = claws[1].get_position() + 225.0;
+		if (master.get_digital(E_CONTROLLER_DIGITAL_A)) {
+			for (const Wheel &wheel : wheels) {
+				wheel.motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+				wheel.motor.move_relative(0.0, 0.0);
+			}
+		} else {
+			for (const Wheel &wheel : wheels) {
+				wheel.motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+			}
+		}
+
+		wheels[0].setAngle(claws[0].get_position() + 315.0);
+		wheels[1].setAngle(claws[1].get_position() + 225.0);
 
 		int insideButtons[2] = {master.get_digital(E_CONTROLLER_DIGITAL_L1),
 								master.get_digital(E_CONTROLLER_DIGITAL_R1)};
@@ -126,12 +141,15 @@ void opcontrol() {
 		for (int i = 0; i < sizeof(insideButtons) / sizeof(*insideButtons);
 			 i++) {
 			if (!insideButtons[i] && !outsideButtons[i]) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 				claws[i].move_relative(0.0, 0);
 			}
 			if (insideButtons[i]) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 				claws[i].move_relative(25.0, 100.0);
 			}
 			if (outsideButtons[i]) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
 				claws[i].move_relative(45.0, 100.0);
 			}
 			if (insideButtons[i] && outsideButtons[i]) {
