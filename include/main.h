@@ -36,6 +36,7 @@
 
 #include "api.h"
 #include <math.h>
+#include <vector>
 
 /**
  * You should add more #includes here
@@ -79,4 +80,4 @@ void opcontrol(void);
 //#include <iostream>
 #endif
 
-#endif  // _PROS_MAIN_H_
+#endif // _PROS_MAIN_H_
