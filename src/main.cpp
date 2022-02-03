@@ -20,30 +20,30 @@ void competition_initialize() {
 }
 void autonomous() {}
 
+class Wheel {
+  public:
+	Motor motor;
+	double angle;
+	Wheel(Motor motor, double a) : motor(motor), angle(a){};
+	double getValue(double angle1, double magnitude) {
+		double diff = fmod((angle1 - angle + 180.0), 360.0) - 180.0;
+		double angleDist = diff < -180.0 ? diff + 360.0 : diff;
+		angleDist = angleDist / -180.0 + 1.0;
+		double returnVal = magnitude * angleDist;
+		returnVal = returnVal > 1.0 ? 1.0 : returnVal;
+		returnVal = returnVal < -1.0 ? -1.0 : returnVal;
+		return returnVal;
+	};
+	double setAngle(double angle1) {
+		double newAngle = fmod(angle1, 360.0);
+		this->angle = newAngle < 0.0 ? newAngle + 360.0 : newAngle;
+		return this->angle;
+	}
+};
+
 void opcontrol() {
 	lcd::print(0, 0, "opcontrol");
 	Controller master(E_CONTROLLER_MASTER);
-
-	class Wheel {
-	  public:
-		Motor motor;
-		double angle;
-		Wheel(Motor motor, double a) : motor(motor), angle(a){};
-		double getValue(double angle1, double magnitude) {
-			double diff = fmod((angle1 - angle + 180.0), 360.0) - 180.0;
-			double angleDist = diff < -180.0 ? diff + 360.0 : diff;
-			angleDist = angleDist / -180.0 + 1.0;
-			double returnVal = magnitude * angleDist;
-			returnVal = returnVal > 1.0 ? 1.0 : returnVal;
-			returnVal = returnVal < -1.0 ? -1.0 : returnVal;
-			return returnVal;
-		};
-		double setAngle(double angle1) {
-			double newAngle = fmod(angle1, 360.0);
-			this->angle = newAngle < 0.0 ? newAngle + 360.0 : newAngle;
-			return this->angle;
-		}
-	};
 
 	std::array<Wheel, 4> wheels{
 		Wheel{Motor{10}, 315.0},
@@ -80,13 +80,12 @@ void opcontrol() {
 		double movementAngle = atan(ly / lx) * 180.0 / M_PI;
 		double movementMagnitude = sqrt(lx * lx + ly * ly);
 
-		double rots[4] = {rx, -rx, rx, -rx};
+		std::array<double, 4> rots = {rx, -rx, rx, -rx};
 
 		for (int i = 0; i < wheels.size(); i++) {
 			float value =
 				(wheels[i].getValue(movementAngle, movementMagnitude) +
-				 rots[i]) /
-				2.0;
+				 rots[i]);
 			value = value > 1.0 ? 1.0 : value;
 			value = value < -1.0 ? -1.0 : value;
 			if (abs(value) > 0.001) {
