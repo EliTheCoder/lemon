@@ -3,7 +3,7 @@ using namespace pros;
 
 void initialize() {
 	Controller master(E_CONTROLLER_MASTER);
-	master.rumble("..");
+	lcd::initialize();
 	opcontrol();
 }
 void disabled() {
@@ -21,15 +21,14 @@ void competition_initialize() {
 void autonomous() {}
 
 void opcontrol() {
+	lcd::print(0, 0, "opcontrol");
 	Controller master(E_CONTROLLER_MASTER);
-	master.rumble("---");
 
 	class Wheel {
 	  public:
 		Motor motor;
 		double angle;
-		Wheel() : motor(1), angle(0) {}
-		Wheel(Motor motor, double a) : motor(motor) { this->angle = a; };
+		Wheel(Motor motor, double a) : motor(motor), angle(a){};
 		double getValue(double angle1, double magnitude) {
 			double diff = fmod((angle1 - angle + 180.0), 360.0) - 180.0;
 			double angleDist = diff < -180.0 ? diff + 360.0 : diff;
@@ -44,24 +43,16 @@ void opcontrol() {
 			this->angle = newAngle < 0.0 ? newAngle + 360.0 : newAngle;
 			return this->angle;
 		}
-		Wheel operator=(Wheel other) { return Wheel(other.motor, other.angle); }
 	};
 
-	std::array<Wheel, 4> wheels;
-	int wheelPorts[4] = {
-		10, // front-left
-		20, // front-right
-		1,	// back-left
-		11	// back-right
+	std::array<Wheel, 4> wheels{
+		Wheel{Motor{10}, 315.0},
+		Wheel{Motor{20}, 225.0},
+		Wheel{Motor{1}, 225.0},
+		Wheel{Motor{11}, 315.0},
 	};
-	double wheelAngles[4] = {315.0, 225.0, 225.0, 315.0};
-	for (int i = 0; i < wheels.size(); i++) {
-		wheels[i] = Wheel(Motor(wheelPorts[i]), wheelAngles[i]);
-	}
 
-	const Motor lclaw(9, true);
-	const Motor rclaw(19);
-	const Motor claws[2] = {lclaw, rclaw};
+	std::array<Motor, 2> claws{Motor(9, true), Motor(19)};
 
 	master.clear();
 	master.print(0, 0, "lemon is happi :D");
@@ -81,11 +72,11 @@ void opcontrol() {
 	int autonomousHold = 0;
 	int tareHold = 0;
 
-	double lx = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
-	double ly = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
-	double rx = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
-
 	while (true) {
+		double lx = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X);
+		double ly = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y);
+		double rx = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X);
+
 		double movementAngle = atan(ly / lx) * 180.0 / M_PI;
 		double movementMagnitude = sqrt(lx * lx + ly * ly);
 
@@ -140,7 +131,7 @@ void opcontrol() {
 			}
 		} else {
 			for (const Wheel &wheel : wheels) {
-				wheel.motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+				wheel.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 			}
 		}
 
@@ -156,18 +147,19 @@ void opcontrol() {
 			 i++) {
 			if (!insideButtons[i] && !outsideButtons[i]) {
 				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-				claws[i].move_relative(0.0, 0);
+				claws[i].move_absolute(0.0, 0);
 			}
 			if (insideButtons[i]) {
 				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-				claws[i].move_relative(25.0, 100.0);
+				claws[i].move_absolute(25.0, 100.0);
+			} else {
 			}
 			if (outsideButtons[i]) {
 				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
-				claws[i].move_relative(45.0, 100.0);
+				claws[i].move_absolute(45.0, 100.0);
 			}
 			if (insideButtons[i] && outsideButtons[i]) {
-				claws[i].move_relative(0.0, 0.0);
+				claws[i].move_absolute(0.0, 0.0);
 			}
 		}
 	}
