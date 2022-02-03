@@ -1,11 +1,8 @@
 #include "main.h"
+#include "wheel.hpp"
 using namespace pros;
 
-void initialize() {
-	Controller master(E_CONTROLLER_MASTER);
-	lcd::initialize();
-	opcontrol();
-}
+void initialize() { lcd::initialize(); }
 void disabled() {
 	Controller master(E_CONTROLLER_MASTER);
 	master.clear();
@@ -13,33 +10,8 @@ void disabled() {
 	master.print(0, 0, "lemon is angy");
 	master.print(1, 0, "lemon can't move >:(");
 }
-void competition_initialize() {
-	Controller master(E_CONTROLLER_MASTER);
-	master.rumble(".-.-");
-	opcontrol();
-}
+void competition_initialize() {}
 void autonomous() {}
-
-class Wheel {
-  public:
-	Motor motor;
-	double angle;
-	Wheel(Motor motor, double a) : motor(motor), angle(a){};
-	double getValue(double angle1, double magnitude) {
-		double diff = fmod((angle1 - angle + 180.0), 360.0) - 180.0;
-		double angleDist = diff < -180.0 ? diff + 360.0 : diff;
-		angleDist = angleDist / -180.0 + 1.0;
-		double returnVal = magnitude * angleDist;
-		returnVal = returnVal > 1.0 ? 1.0 : returnVal;
-		returnVal = returnVal < -1.0 ? -1.0 : returnVal;
-		return returnVal;
-	};
-	double setAngle(double angle1) {
-		double newAngle = fmod(angle1, 360.0);
-		this->angle = newAngle < 0.0 ? newAngle + 360.0 : newAngle;
-		return this->angle;
-	}
-};
 
 void opcontrol() {
 	lcd::print(0, 0, "opcontrol");
@@ -86,8 +58,7 @@ void opcontrol() {
 			float value =
 				(wheels[i].getValue(movementAngle, movementMagnitude) +
 				 rots[i]);
-			value = value > 1.0 ? 1.0 : value;
-			value = value < -1.0 ? -1.0 : value;
+			value = clamp(value, -1.0, 1.0);
 			if (abs(value) > 0.001) {
 				wheels[i].motor.move_relative(signbit(value) * 45.0, value);
 			} else {
