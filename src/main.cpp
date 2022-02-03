@@ -1,19 +1,28 @@
 #include "main.h"
 using namespace pros;
 
-void initialize() {}
+void initialize() {
+	Controller master(E_CONTROLLER_MASTER);
+	master.rumble("..");
+	opcontrol();
+}
 void disabled() {
 	Controller master(E_CONTROLLER_MASTER);
 	master.clear();
-	master.rumble("...");
+	master.rumble("_..");
 	master.print(0, 0, "lemon is angy");
 	master.print(1, 0, "lemon can't move >:(");
 }
-void competition_initialize() {}
+void competition_initialize() {
+	Controller master(E_CONTROLLER_MASTER);
+	master.rumble(".-.-");
+	opcontrol();
+}
 void autonomous() {}
 
 void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
+	master.rumble("---");
 
 	class Wheel {
 	  public:
@@ -40,19 +49,18 @@ void opcontrol() {
 
 	std::array<Wheel, 4> wheels;
 	int wheelPorts[4] = {
-		8,	// front-left
-		16, // front-right
+		10, // front-left
+		20, // front-right
 		1,	// back-left
-		9	// back-right
+		11	// back-right
 	};
 	double wheelAngles[4] = {315.0, 225.0, 225.0, 315.0};
 	for (int i = 0; i < wheels.size(); i++) {
 		wheels[i] = Wheel(Motor(wheelPorts[i]), wheelAngles[i]);
 	}
 
-	const Motor lclaw(7);
-	lclaw.set_reversed(true);
-	const Motor rclaw(15);
+	const Motor lclaw(9, true);
+	const Motor rclaw(19);
 	const Motor claws[2] = {lclaw, rclaw};
 
 	master.clear();
@@ -107,7 +115,7 @@ void opcontrol() {
 			autonomousHold = 0.0;
 		}
 
-		if (master.get_digital(E_CONTROLLER_DIGITAL_X)) {
+		if (master.get_digital(E_CONTROLLER_DIGITAL_Y)) {
 			tareHold++;
 			if (tareHold > 100.0) {
 				tareHold = 0.0;
@@ -117,6 +125,12 @@ void opcontrol() {
 			}
 		} else {
 			tareHold = 0;
+		}
+
+		if (master.get_digital(E_CONTROLLER_DIGITAL_X)) {
+			for (const Motor &motor : claws) {
+				motor.move_absolute(0.0, 100.0);
+			}
 		}
 
 		if (master.get_digital(E_CONTROLLER_DIGITAL_A)) {
@@ -141,15 +155,15 @@ void opcontrol() {
 		for (int i = 0; i < sizeof(insideButtons) / sizeof(*insideButtons);
 			 i++) {
 			if (!insideButtons[i] && !outsideButtons[i]) {
-				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 				claws[i].move_relative(0.0, 0);
 			}
 			if (insideButtons[i]) {
-				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 				claws[i].move_relative(25.0, 100.0);
 			}
 			if (outsideButtons[i]) {
-				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_BRAKE);
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 				claws[i].move_relative(45.0, 100.0);
 			}
 			if (insideButtons[i] && outsideButtons[i]) {
