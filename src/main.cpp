@@ -11,6 +11,8 @@ void disabled() {
 	master.print(1, 0, "lemon can't move >:(");
 }
 
+bool autonMode = true;
+
 const double oneRot = 8 * M_PI / sqrt(2);
 const uint8_t FORWARD = 0;
 const uint8_t BACKWARD = 1;
@@ -71,16 +73,26 @@ void autonomous() {
 		wheel.motor.set_gearing(E_MOTOR_GEARSET_18);
 	}
 
-	move(wheels, FORWARD, 56.0);
-	move(wheels, RIGHT, 60.0);
+	if (!autonMode) {
+		move(wheels, FORWARD, 56.0);
+		move(wheels, RIGHT, 60.0);
+	} else {
+		wheels[2].motor.move(-100);
+		delay(100);
+		wheels[2].motor.move(0);
+	}
 
 	for (const Wheel &wheel : wheels) {
 		wheel.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
 	}
 }
 
+void autonChange() { autonMode = !autonMode; }
+
 void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
+
+	lcd::register_btn0_cb(autonChange);
 
 	std::array<Wheel, 4> wheels{
 		Wheel{Motor{10}, 315.0},
@@ -113,6 +125,8 @@ void opcontrol() {
 		double lx = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X) / 127.0;
 		double ly = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y) / 127.0;
 		double rx = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X) / 127.0;
+
+		lcd::print(0, autonMode ? "bloop" : "left");
 
 		std::array<double, 4> rots{rx, rx, -rx, -rx};
 
