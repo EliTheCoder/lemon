@@ -1,5 +1,6 @@
 #include "main.h"
 #include "wheel.hpp"
+#include "wheelHelper.hpp"
 using namespace pros;
 
 void initialize() {}
@@ -10,8 +11,23 @@ void disabled() {
 	master.print(0, 0, "lemon is angy");
 	master.print(1, 0, "lemon can't move >:(");
 }
+
 void competition_initialize() {}
-void autonomous() {}
+void autonomous() {
+
+	std::array<Wheel, 4> wheels{
+		Wheel{Motor{10}, 315.0},
+		Wheel{Motor{18}, 225.0},
+		Wheel{Motor{1, true}, 225.0},
+		Wheel{Motor{11, true}, 315.0},
+	};
+
+	for (int i = 0; i < wheels.size(); i++) {
+		wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+	}
+
+	move(wheels, FORWARD, 18.0);
+}
 
 void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
