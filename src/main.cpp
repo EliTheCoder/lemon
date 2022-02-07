@@ -3,15 +3,9 @@
 using namespace pros;
 
 void initialize() { lcd::initialize(); }
-void disabled() {
-	Controller master(E_CONTROLLER_MASTER);
-	master.clear();
-	master.rumble("_..");
-	master.print(0, 0, "lemon is angy");
-	master.print(1, 0, "lemon can't move >:(");
-}
+void disabled() {}
 
-bool autonMode = true;
+int autonMode = 0;
 
 const double oneRot = 8 * M_PI / sqrt(2);
 const uint8_t FORWARD = 0;
@@ -73,13 +67,18 @@ void autonomous() {
 		wheel.motor.set_gearing(E_MOTOR_GEARSET_18);
 	}
 
-	if (!autonMode) {
+	if (autonMode == 0) {
+		wheels[2].motor.move(-100);
+		wheels[0].motor.move(-100);
+		delay(500);
+		wheels[2].motor.move(0);
+		wheels[0].motor.move(0);
+	} else if (autonMode == 1) {
 		move(wheels, FORWARD, 56.0);
 		move(wheels, RIGHT, 60.0);
-	} else {
-		wheels[2].motor.move(-100);
-		delay(100);
-		wheels[2].motor.move(0);
+	} else if (autonMode == 2) {
+		move(wheels, FORWARD, 56.0);
+		move(wheels, LEFT, 60.0);
 	}
 
 	for (const Wheel &wheel : wheels) {
@@ -87,7 +86,10 @@ void autonomous() {
 	}
 }
 
-void autonChange() { autonMode = !autonMode; }
+void autonChange() {
+	autonMode++;
+	autonMode %= 4;
+}
 
 void opcontrol() {
 	Controller master(E_CONTROLLER_MASTER);
@@ -103,8 +105,11 @@ void opcontrol() {
 
 	std::array<Motor, 2> claws{Motor(9, true), Motor(19)};
 
-	master.clear();
-	master.print(0, 0, "lemon is happi :D");
+	if (!competition::is_connected()) {
+		master.print(0, 0, "lemon is happi :D");
+	} else {
+		master.print(0, 0, "lemon is angy >:(");
+	}
 
 	for (const Wheel &wheel : wheels) {
 		wheel.motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
@@ -121,12 +126,14 @@ void opcontrol() {
 	int autonomousHold = 0;
 	int tareHold = 0;
 
+	std::array<std::string, 4> autonModes{"bloop", "left", "right", "none"};
+
 	while (true) {
 		double lx = master.get_analog(E_CONTROLLER_ANALOG_LEFT_X) / 127.0;
 		double ly = master.get_analog(E_CONTROLLER_ANALOG_LEFT_Y) / 127.0;
 		double rx = master.get_analog(E_CONTROLLER_ANALOG_RIGHT_X) / 127.0;
 
-		lcd::print(0, autonMode ? "bloop" : "left");
+		lcd::print(0, "Autonomous Mode: %s", autonModes[autonMode].c_str());
 
 		std::array<double, 4> rots{rx, rx, -rx, -rx};
 
@@ -146,6 +153,29 @@ void opcontrol() {
 			}
 		} else {
 			autonomousHold = 0.0;
+		}
+
+		if (abs(rx + lx + ly) < 0.01) {
+
+			for (int i = 0; i < 4; i++) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+				wheels[i].motor.move_relative(0.0, 100.0);
+			}
+		} else {
+			for (int i = 0; i < 4; i++) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+			}
+		}
+
+		if (master.get_digital(E_CONTROLLER_DIGITAL_X)) {
+			for (int i = 0; i < 4; i++) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_HOLD);
+				wheels[i].motor.move_relative(0.0, 100.0);
+			}
+		} else {
+			for (int i = 0; i < 4; i++) {
+				wheels[i].motor.set_brake_mode(E_MOTOR_BRAKE_COAST);
+			}
 		}
 
 		delay(10);
